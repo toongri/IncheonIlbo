@@ -15,7 +15,7 @@ import static com.incheonilbo.lolanalysis.entity.QGameData.gameData;
 
 @Repository
 @RequiredArgsConstructor
-public class GameDataQueryRepository {
+public class ChemChampsQueryRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
     final String WIN_VALUE = "True";

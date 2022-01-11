@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Setter
 public class GameDataId implements Serializable {
     @Column(name = "GAMEID")
-    private Long gameId;
+    private String gameId;
 
     @Column(name = "PARTICIPANTID")
     private int inGameNumber;

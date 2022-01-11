@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ForChemChampLessLane {
-    private Integer championId;
+public class ForSkillFormat {
+    private String skillCombination;
     private Long amountOfGame;
-    private Long amountOfGameAboutWin;
 }
