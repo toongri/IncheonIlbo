@@ -1,9 +1,7 @@
 package com.incheonilbo.lolanalysis.service;
 
-import com.incheonilbo.lolanalysis.dto.ForChemChamp;
-import com.incheonilbo.lolanalysis.dto.ForChemChampLessLaneAndChampionId;
-import com.incheonilbo.lolanalysis.dto.ForSkillAllCountAndWinCount;
-import com.incheonilbo.lolanalysis.dto.ForSkillFormat;
+import com.incheonilbo.lolanalysis.dto.*;
+import com.incheonilbo.lolanalysis.repository.query.ChampCounterQueryRepository;
 import com.incheonilbo.lolanalysis.repository.query.ChampSkillQueryRepository;
 import com.incheonilbo.lolanalysis.repository.query.ChemChampsQueryRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +18,37 @@ public class GameDataService {
 
     private final ChemChampsQueryRepository gameDataQueryRepository;
     private final ChampSkillQueryRepository champSkillQueryRepository;
+    private final ChampCounterQueryRepository champCounterQueryRepository;
 
     final List<String> laneList = Arrays.asList("TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY");
     final List<String> skillChoiceArray = Arrays.asList("skill5", "skill10", "skill15");
+    final Integer COUNT5_GAME_LIMIT = 100;
+    final Integer COUNT5_CHAMP_LIMIT = 5;
+
+    public Map<Integer, Double> find5ChampsAboutCountersOfMainChamp(Integer championIdCond, String laneCond) {
+        List<ForCounter5Champ> champsAll = champCounterQueryRepository.get5ChampsAboutCountersOfMainChamp(championIdCond, laneCond);
+        List<ForCounter5Champ> champsWin = champCounterQueryRepository.get5ChampsAboutWinCountersOfMainChamp(championIdCond, laneCond);
+
+        Map<Integer, Long> map = champsAll.stream().filter(champ -> champ.getAmountOfGame() > COUNT5_GAME_LIMIT).collect(Collectors.toMap(ForCounter5Champ::getChampionId, ForCounter5Champ::getAmountOfGame));
+        Map<Integer, Double> rateMap = new HashMap<>();
+
+        for (ForCounter5Champ champ : champsWin) {
+            Integer championId = champ.getChampionId();
+            if (map.containsKey(championId)) {
+                rateMap.put(championId, (double)champ.getAmountOfGame()/map.get(championId));
+            }
+        }
+
+        List<Map.Entry<Integer, Double>> entries = new ArrayList<>(rateMap.entrySet());
+        entries.sort((v1, v2) -> v1.getValue().compareTo(v2.getValue()));
+
+        Map<Integer, Double> result = new HashMap<>();
+
+        for (int i = 0; i < COUNT5_CHAMP_LIMIT; i++) {
+            result.put(entries.get(i).getKey(), entries.get(i).getValue());
+        }
+        return result;
+    }
 
     public Map<String, ForSkillAllCountAndWinCount> findOneAboutSkillByChampId(Integer championIdCond, String laneCond, String skillLengthCond) {
 
@@ -61,7 +87,6 @@ public class GameDataService {
         for (ForChemChamp champ : champsAboutWin) {
             champsUsingMap.get(champ.getLane()).get(champ.getChampionId()).setAmountOfGameAboutWin(champ.getAmountOfGame());
         }
-
         return champsUsingMap;
     }
 

@@ -35,4 +35,9 @@ public class GameDataController {
             @RequestParam(value = "skill") String skillLength) {
         return new ApiResult(gameDataService.findOneAboutSkillByChampId(championId, lane, skillLength));
     }
+
+    @GetMapping("/champs/{id}/counter5")
+    public ApiResult dgsdf( @PathVariable(value = "id") Integer championId, @RequestParam(value = "lane") String lane) {
+        return new ApiResult(gameDataService.find5ChampsAboutCountersOfMainChamp(championId, lane));
+    }
 }
