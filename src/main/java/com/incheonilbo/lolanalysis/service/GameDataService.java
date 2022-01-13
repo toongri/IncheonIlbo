@@ -3,6 +3,7 @@ package com.incheonilbo.lolanalysis.service;
 import com.incheonilbo.lolanalysis.dto.*;
 import com.incheonilbo.lolanalysis.repository.query.ChampCounterQueryRepository;
 import com.incheonilbo.lolanalysis.repository.query.ChampSkillQueryRepository;
+import com.incheonilbo.lolanalysis.repository.query.ChampTableRepository;
 import com.incheonilbo.lolanalysis.repository.query.ChemChampsQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,25 @@ public class GameDataService {
     private final ChemChampsQueryRepository gameDataQueryRepository;
     private final ChampSkillQueryRepository champSkillQueryRepository;
     private final ChampCounterQueryRepository champCounterQueryRepository;
+    private final ChampTableRepository champTableRepository;
 
     final List<String> laneList = Arrays.asList("TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY");
     final List<String> skillChoiceArray = Arrays.asList("skill5", "skill10", "skill15");
     final Integer COUNT5_GAME_LIMIT = 100;
     final Integer COUNT5_CHAMP_LIMIT = 5;
+
+    public Map<Integer, ForChampsTableAboutAllAndWinRate> getChampsTable(String laneCond) {
+        List<ForChampsTable> champsByLane = champTableRepository.findChampsByLane(laneCond);
+        List<ForChampsTable> champsWinByLane = champTableRepository.findChampsWinByLane(laneCond);
+
+        Map<Integer, Long> map = champsByLane.stream().collect(Collectors.toMap(ForChampsTable::getChampionId, ForChampsTable::getAmountOfGame));
+        Map<Integer, ForChampsTableAboutAllAndWinRate> result = new HashMap<>();
+        for (ForChampsTable champ : champsWinByLane) {
+            result.put(champ.getChampionId(), new ForChampsTableAboutAllAndWinRate(map.get(champ.getChampionId()), (double) champ.getAmountOfGame() / map.get(champ.getChampionId())));
+        }
+        return result;
+
+    }
 
     public Map<Integer, Double> find5ChampsAboutCountersOfMainChamp(Integer championIdCond, String laneCond) {
         List<ForCounter5Champ> champsAll = champCounterQueryRepository.get5ChampsAboutCountersOfMainChamp(championIdCond, laneCond);
@@ -41,7 +56,6 @@ public class GameDataService {
 
         List<Map.Entry<Integer, Double>> entries = new ArrayList<>(rateMap.entrySet());
         entries.sort((v1, v2) -> v1.getValue().compareTo(v2.getValue()));
-
         Map<Integer, Double> result = new HashMap<>();
 
         for (int i = 0; i < COUNT5_CHAMP_LIMIT; i++) {

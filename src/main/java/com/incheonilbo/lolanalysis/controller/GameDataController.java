@@ -19,6 +19,11 @@ public class GameDataController {
 
     private final GameDataService gameDataService;
 
+    @GetMapping("/main")
+    public ApiResult dfdfff(@RequestParam("lane") String lane) {
+
+        return new ApiResult(gameDataService.getChampsTable(lane));
+    }
 
     @GetMapping("/champs/{id}/chem")
     public ApiResult abcd(
