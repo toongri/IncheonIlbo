@@ -1,6 +1,11 @@
 buildscript {
-	ext {
-		queryDslVersion = "5.0.0"
+	ext{
+		queryDslVersion = "4.4.0"
+		springFrameworkBootVersion = "2.5.8"
+		projectLombokVersion = "1.18.22"
+		odbcJdbcVersion = "21.1.0.0"
+		swaggerVersion = "2.9.2"
+		p6spyVersion = "1.8.0"
 	}
 }
 
@@ -27,21 +32,20 @@ repositories {
 }
 
 dependencies {
-	implementation "com.querydsl:querydsl-jpa"
-	implementation "com.querydsl:querydsl-apt"
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0'
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
+	implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
+	implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springFrameworkBootVersion}"
+	implementation "org.springframework.boot:spring-boot-starter-web:${springFrameworkBootVersion}"
+	implementation "org.springframework.boot:spring-boot-starter-thymeleaf:${springFrameworkBootVersion}"
+	developmentOnly "org.springframework.boot:spring-boot-devtools:${springFrameworkBootVersion}"
+	testImplementation "org.springframework.boot:spring-boot-starter-test:${springFrameworkBootVersion}"
+	compileOnly "org.projectlombok:lombok:${projectLombokVersion}"
+	annotationProcessor "org.projectlombok:lombok:${projectLombokVersion}"
+	runtimeOnly "com.oracle.database.jdbc:ojdbc8:${odbcJdbcVersion}"
 	//swagger 추가
-	implementation 'io.springfox:springfox-swagger2:2.9.2'
-	implementation 'io.springfox:springfox-swagger-ui:2.9.2'
-	implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.8.0")//개발용 코드 서비스시엔 성능비교 후 사용 필수
+	implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
+	implementation "io.springfox:springfox-swagger-ui:${swaggerVersion}"
+	implementation "com.github.gavlyukovskiy:p6spy-spring-boot-starter:${p6spyVersion}"//개발용 코드 서비스시엔 성능비교 후 사용 필수
 }
 
 test {
