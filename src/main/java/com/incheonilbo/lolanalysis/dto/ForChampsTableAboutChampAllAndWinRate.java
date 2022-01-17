@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ForSkillAllCountAndWinCount {
-    private String skillCombination;
+public class ForChampsTableAboutChampAllAndWinRate {
+    private Integer championId;
     private Long amountOfGame;
-    private Long winAmountOfGame;
+    private Double winRate;
 }

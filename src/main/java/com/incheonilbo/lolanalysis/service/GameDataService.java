@@ -27,44 +27,57 @@ public class GameDataService {
     final Integer COUNT5_GAME_LIMIT = 100;
     final Integer COUNT5_CHAMP_LIMIT = 5;
 
-    public Map<Integer, ForChampsTableAboutAllAndWinRate> getChampsTable(String laneCond) {
+    public List<ForChampsTableAboutChampAllAndWinRate> getChampsTable(String laneCond) {
+
         List<ForChampsTable> champsByLane = champTableRepository.findChampsByLane(laneCond);
         List<ForChampsTable> champsWinByLane = champTableRepository.findChampsWinByLane(laneCond);
 
         Map<Integer, Long> map = champsByLane.stream().collect(Collectors.toMap(ForChampsTable::getChampionId, ForChampsTable::getAmountOfGame));
-        Map<Integer, ForChampsTableAboutAllAndWinRate> result = new HashMap<>();
-        for (ForChampsTable champ : champsWinByLane) {
-            result.put(champ.getChampionId(), new ForChampsTableAboutAllAndWinRate(map.get(champ.getChampionId()), (double) champ.getAmountOfGame() / map.get(champ.getChampionId())));
-        }
-        return result;
+        List<ForChampsTableAboutChampAllAndWinRate> result = new ArrayList<>();
 
+        for (ForChampsTable champ : champsWinByLane) {
+            result.add(new ForChampsTableAboutChampAllAndWinRate(champ.getChampionId(), map.get(champ.getChampionId()), (double) champ.getAmountOfGame() / map.get(champ.getChampionId())));
+        }
+
+        return result;
     }
 
-    public Map<Integer, Double> find5ChampsAboutCountersOfMainChamp(Integer championIdCond, String laneCond) {
+    public List<ForChampIdAndRate> find5ChampsAboutCountersOfMainChamp(Integer championIdCond, String laneCond) {
+
         List<ForCounter5Champ> champsAll = champCounterQueryRepository.get5ChampsAboutCountersOfMainChamp(championIdCond, laneCond);
         List<ForCounter5Champ> champsWin = champCounterQueryRepository.get5ChampsAboutWinCountersOfMainChamp(championIdCond, laneCond);
 
         Map<Integer, Long> map = champsAll.stream().filter(champ -> champ.getAmountOfGame() > COUNT5_GAME_LIMIT).collect(Collectors.toMap(ForCounter5Champ::getChampionId, ForCounter5Champ::getAmountOfGame));
-        Map<Integer, Double> rateMap = new HashMap<>();
+        List<ForChampIdAndRate> champIdAndRates = new ArrayList<>();
 
         for (ForCounter5Champ champ : champsWin) {
             Integer championId = champ.getChampionId();
             if (map.containsKey(championId)) {
-                rateMap.put(championId, (double)champ.getAmountOfGame()/map.get(championId));
+                champIdAndRates.add(new ForChampIdAndRate(championId, (double)champ.getAmountOfGame()/map.get(championId)));
             }
         }
 
-        List<Map.Entry<Integer, Double>> entries = new ArrayList<>(rateMap.entrySet());
-        entries.sort((v1, v2) -> v1.getValue().compareTo(v2.getValue()));
-        Map<Integer, Double> result = new HashMap<>();
+        champIdAndRates.sort(new ChampRateComparator());
 
-        for (int i = 0; i < COUNT5_CHAMP_LIMIT; i++) {
-            result.put(entries.get(i).getKey(), entries.get(i).getValue());
-        }
+        List<ForChampIdAndRate> result = champIdAndRates.stream().limit(5).collect(Collectors.toList());
+
         return result;
     }
 
-    public Map<String, ForSkillAllCountAndWinCount> findOneAboutSkillByChampId(Integer championIdCond, String laneCond, String skillLengthCond) {
+    public static class ChampRateComparator implements Comparator<ForChampIdAndRate> {
+
+        @Override
+        public int compare(ForChampIdAndRate o1, ForChampIdAndRate o2) {
+            if (o1.getRate() > o2.getRate()) {
+                return 1;
+            } else if (o1.getRate() < o2.getRate()) {
+                return -1;
+            }
+            return 0;
+        }
+    }
+
+    public List<ForSkillAllCountAndWinCount> findOneAboutSkillByChampId(Integer championIdCond, String laneCond, String skillLengthCond) {
 
         List<ForSkillFormat> amountOfGameAboutSkillData;
         List<ForSkillFormat> amountOfGameAboutWinSkillData;
@@ -80,41 +93,72 @@ public class GameDataService {
             amountOfGameAboutWinSkillData = champSkillQueryRepository.getAmountOfGameAboutWinSkillDataIndex2(championIdCond, laneCond);
         }
 
-        Map<String, ForSkillAllCountAndWinCount> dataListToMap = amountOfGameAboutSkillData.stream().collect(Collectors.toMap(ForSkillFormat::getSkillCombination, data -> new ForSkillAllCountAndWinCount(data.getAmountOfGame(), 0L)));
-        for (ForSkillFormat data : amountOfGameAboutWinSkillData) {
-            dataListToMap.get(data.getSkillCombination()).setWinAmountOfGame(data.getAmountOfGame());
-        }
+        Map<String, Long> dataListToMap = amountOfGameAboutSkillData.stream().collect(Collectors.toMap(ForSkillFormat::getSkillCombination, ForSkillFormat::getAmountOfGame));
+        List<ForSkillAllCountAndWinCount> result = new ArrayList<>();
 
-        return dataListToMap;
+
+        for (ForSkillFormat data : amountOfGameAboutWinSkillData) {
+            String skillCombination = data.getSkillCombination();
+            if (dataListToMap.containsKey(skillCombination)) {
+                result.add(new ForSkillAllCountAndWinCount(data.getSkillCombination(), dataListToMap.get(data.getSkillCombination()), data.getAmountOfGame()));
+            }
+        }
+        return result;
     }
 
-    public Map<String, Map<Integer, ForChemChampLessLaneAndChampionId>> findChemChampsByLaneAndChamp(Integer championId, String laneCond, List<Integer> championIdsCond, List<String> lanesCond) {
+    public Map<String, List<ForChemChampLessLaneAndChampionId>> findChemChampsByLaneAndChamp(Integer championId, String laneCond, List<Integer> championIdsCond, List<String> lanesCond) {
         List<ForChemChamp> champs = gameDataQueryRepository.getForChemChamps(championId, laneCond, championIdsCond, lanesCond);
         List<ForChemChamp> champsAboutWin = gameDataQueryRepository.getForChemChampsAboutWin(championId, laneCond, championIdsCond, lanesCond);
 
-        Map<String, Map<Integer, ForChemChampLessLaneAndChampionId>> champsUsingMap = chageChampListToMap(champs);
-
+        Map<String, Map<Integer, Long>> champsUsingMap = changeChampListToMap(champs);
         return setChampVictoryAmountInMap(champsAboutWin, champsUsingMap);
     }
 
-    private Map<String, Map<Integer, ForChemChampLessLaneAndChampionId>> setChampVictoryAmountInMap(List<ForChemChamp> champsAboutWin, Map<String, Map<Integer, ForChemChampLessLaneAndChampionId>> champsUsingMap) {
-        for (ForChemChamp champ : champsAboutWin) {
-            champsUsingMap.get(champ.getLane()).get(champ.getChampionId()).setAmountOfGameAboutWin(champ.getAmountOfGame());
+    private Map<String, List<ForChemChampLessLaneAndChampionId>> setChampVictoryAmountInMap(List<ForChemChamp> champsAboutWin, Map<String, Map<Integer, Long>> champsUsingMap) {
+
+        Map<String, List<ForChemChampLessLaneAndChampionId>> result = new HashMap<>();
+        for (String s : laneList) {
+            result.put(s, new ArrayList<>());
         }
-        return champsUsingMap;
+
+        for (ForChemChamp champ : champsAboutWin) {
+            Integer championId = champ.getChampionId();
+            if (champsUsingMap.get(champ.getLane()).containsKey(championId)) {
+                result.get(champ.getLane()).add(new ForChemChampLessLaneAndChampionId(champ.getChampionId(), champsUsingMap.get(champ.getLane()).get(championId), champ.getAmountOfGame()));
+            }
+        }
+        for (String s : laneList) {
+            result.get(s).sort(new ChemPickRateComparator());
+        }
+
+        return result;
     }
 
-    private Map<String, Map<Integer, ForChemChampLessLaneAndChampionId>> chageChampListToMap(List<ForChemChamp> champs) {
+    public static class ChemPickRateComparator implements Comparator<ForChemChampLessLaneAndChampionId> {
 
-        Map<String, Map<Integer, ForChemChampLessLaneAndChampionId>> map = new HashMap<>();
+        @Override
+        public int compare(ForChemChampLessLaneAndChampionId o1, ForChemChampLessLaneAndChampionId o2) {
+            if (o1.getAmountOfGame() < o2.getAmountOfGame()) {
+                return 1;
+            } else if (o1.getAmountOfGame() > o2.getAmountOfGame()) {
+                return -1;
+            }
+            return 0;
+        }
+    }
+
+    private Map<String, Map<Integer, Long>> changeChampListToMap(List<ForChemChamp> champs) {
+
+        Map<String, Map<Integer, Long>> map = new HashMap<>();
 
         for (String s : laneList) {
             map.put(s, new HashMap<>());
         }
 
         for (ForChemChamp champ : champs) {
-            map.get(champ.getLane()).put(champ.getChampionId(), new ForChemChampLessLaneAndChampionId(champ.getAmountOfGame(), 0L));
+            map.get(champ.getLane()).put(champ.getChampionId(), champ.getAmountOfGame());
         }
+
         return map;
     }
 

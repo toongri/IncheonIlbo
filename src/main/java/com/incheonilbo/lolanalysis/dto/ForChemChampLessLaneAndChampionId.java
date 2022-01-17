@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ForChemChampLessLaneAndChampionId {
+    private Integer championId;
     private Long amountOfGame;
     private Long amountOfGameAboutWin;
 }

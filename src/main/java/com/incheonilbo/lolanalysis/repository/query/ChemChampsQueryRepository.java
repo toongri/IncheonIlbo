@@ -50,6 +50,19 @@ public class ChemChampsQueryRepository {
         }
     }
 
+    public List<ForChemChamp> getForChemChampsAboutCount(Integer chemChampionIdCond, String laneCond, List<Integer> chemChampionIdsCond, List<String> chemLanesCond) {
+        switch (chemChampionIdsCond.size()) {
+            default:
+                return getForChemChampsByListZero(chemChampionIdCond, laneCond);
+            case 1:
+                return getForChemChampsByListOne(chemChampionIdCond, laneCond, chemChampionIdsCond, chemLanesCond);
+            case 2:
+                return getForChemChampsByListTwo(chemChampionIdCond, laneCond, chemChampionIdsCond, chemLanesCond);
+            case 3:
+                return getForChemChampsByListThree(chemChampionIdCond, laneCond, chemChampionIdsCond, chemLanesCond);
+        }
+    }
+
     private List<ForChemChamp> getForChemChampsAboutWinByListZero(Integer chemChampionIdCond, String laneCond) {
         return jpaQueryFactory
                 .select(Projections.fields(ForChemChamp.class,
