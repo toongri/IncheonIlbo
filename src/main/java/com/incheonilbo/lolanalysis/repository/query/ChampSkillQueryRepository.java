@@ -3,6 +3,7 @@ package com.incheonilbo.lolanalysis.repository.query;
 import com.incheonilbo.lolanalysis.dto.ForSkillFormat;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Wildcard;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -17,7 +18,7 @@ public class ChampSkillQueryRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
     final String WIN_VALUE = "True";
-    final Integer GAME_LIMIT = 20;
+    final Integer GAME_LIMIT = 1;
 
     public List<ForSkillFormat> getAmountOfGameAboutSkillDataIndex0(Integer championIdCond, String laneCond) {
         return jpaQueryFactory
@@ -57,6 +58,36 @@ public class ChampSkillQueryRepository {
                 .groupBy(gameData.skill15History)
                 .having(gameData.skill15History.isNotEmpty(), Wildcard.count.goe(GAME_LIMIT))
                 .fetch();
+    }
+    public Long getCountAmountOfGameAboutSkillDataIndex0(Integer championIdCond, String laneCond) {
+        return jpaQueryFactory
+                .select(Wildcard.count)
+                .from(gameData)
+                .where(
+                        gameData.championId.eq(championIdCond),
+                        gameData.lane.eq(laneCond),
+                        gameData.skill5History.isNotEmpty())
+                .fetchOne();
+    }
+    public Long getCountAmountOfGameAboutSkillDataIndex1(Integer championIdCond, String laneCond) {
+        return jpaQueryFactory
+                .select(Wildcard.count.as("amountOfGame"))
+                .from(gameData)
+                .where(
+                        gameData.championId.eq(championIdCond),
+                        gameData.lane.eq(laneCond),
+                        gameData.skill10History.isNotEmpty())
+                .fetchOne();
+    }
+    public Long getCountAmountOfGameAboutSkillDataIndex2(Integer championIdCond, String laneCond) {
+        return jpaQueryFactory
+                .select(Wildcard.count.as("amountOfGame"))
+                .from(gameData)
+                .where(
+                        gameData.championId.eq(championIdCond),
+                        gameData.lane.eq(laneCond),
+                        gameData.skill15History.isNotEmpty())
+                .fetchOne();
     }
 
     public List<ForSkillFormat> getAmountOfGameAboutWinSkillDataIndex0(Integer championIdCond, String laneCond) {

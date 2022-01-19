@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link th:href="@{/css/bootstrap.css}" rel="stylesheet" />
+    <title>JSP AJAX</title>
+    <script th:src="@{/js/jquery-3.6.0.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.2.0/css/all.min.css" integrity="sha512-6c4nX2tn5KbzeBJo9Ywpa0Gkt+mzCzJBrE1RB6fmpcsoN+b/w/euwIMuQKNyUoU/nToKN3a8SgNOtPrbW12fug==" crossorigin="anonymous" />
+</head>
+<script>
+    $(document).ready(function() {
+        var skills='skill5';
+        getAjax(skills);
+        getCounter();
+    });
+
+    function sortTable(n) {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementById("skilltable");
+        switching = true;
+        var arr;
+        //Set the sorting direction to ascending:
+        arr = ['asc', 'desc'];
+        dir = arr[0];
+        /*Make a loop that will continue until
+        no switching has been done:*/
+        while (switching) {
+            //start by saying: no switching is done:
+            switching = false;
+            rows = table.rows;
+            /*Loop through all table rows (except the
+            first, which contains table headers):*/
+            for (i = 0; i < (rows.length - 1); i++) {
+                //start by saying there should be no switching:
+                shouldSwitch = false;
+                /*Get the two elements you want to compare,
+                one from current row and one from the next:*/
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+                /*check if the two rows should switch place,
+                based on the direction, asc or desc:*/
+                if (dir == arr[0]) {
+                    if (Number(x.innerHTML) < Number(y.innerHTML)) {
+                        //if so, mark as a switch and break the loop:
+                        shouldSwitch= true;
+                        break;
+                    }
+                } else if (dir == arr[1]) {
+                    if (Number(x.innerHTML) > Number(y.innerHTML)) {
+                        //if so, mark as a switch and break the loop:
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                /*If a switch has been marked, make the switch
+                and mark that a switch has been done:*/
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                //Each time a switch is done, increase this count by 1:
+                switchcount ++;
+            } else {
+                /*If no switching has been done AND the direction is "asc",
+                set the direction to "desc" and run the while loop again.*/
+                if (switchcount == 0 && dir == arr[0]) {
+                    dir = arr[1];
+                    switching = true;
+                }
+            }
+        }
+    }
+
+    function getCounter() {
+        var lane = '[[${lane}]]';
+        var champId = [[${championId}]];
+        var messageDTO={
+            lane:lane
+        };
+        $.ajax({
+            url: '/gamedata/api/champs/' + champId + '/counter5',
+            data: messageDTO,
+            type:'GET',
+            success: function (data) {
+                $('#top5CounterChamps').empty();
+                var html ='';
+                $.each(data.data, function (index, element) {
+                    html += '<div class="col-xs-4 col-md-1 top5counter">';
+                    html += '<a href="/gamedata/' + element.championId + '?lane=' + lane + '">';
+                    html += '<img class="imagecountersize" src="/img/champion/' + element.championId + '.png" alt="">';
+                    html += '</a>';
+                    html += '<div>' + (element.rate*100).toFixed(2) + '</div>';
+                    html += '</div>';
+                });
+
+                $('#top5CounterChamps').append(html);
+            }
+        });
+    }
+    function getAjax(skills) {
+        var skill= skills;
+        var lane = '[[${lane}]]';
+        var champId = [[${championId}]];
+        var messageDTO={
+            skill:skill,
+            lane:lane
+        };
+        $.ajax({
+            url: '/gamedata/api/champs/' + champId + '/skills',
+            data: messageDTO,
+            type:'GET',
+            success: function (data) {
+                $('#resultDiv').empty();
+                var html = '<table class="table table-hover tableheader">';
+                html += '<thead>';
+                html += '<tr>';
+                html += '<th class ="skillcolumn">' + '스킬' + '</th>';
+                html += '<th onclick="sortTable(1)"><a href="#">' + '승률( %)' + '</th>';
+                html += '<th onclick="sortTable(2)"><a href="#">' + '선택률( %)' + '</th>';
+                html += '<th onclick="sortTable(3)"><a href="#">' + '표본 수' + '</th>';
+                html += '</tr>';
+                html += '</thead>';
+                html += '</table>';
+                html += '<div class = "tablescroll">'
+                html += '<table class="table table-hover" id="skilltable">';
+                html += '<tbody>';
+                $.each(data.data, function (index, element) {
+                    html += '<tr>';
+                    html += '<td class ="skillcolumn">';
+                    for (let i = 0; i < element.skillCombination.length; i++) {
+                        html += '<img class="imagesize" src="/img/spell/' + champId
+                            + '_' + element.skillCombination[i] + '.png" alt="">';
+                    }
+                    html += '</td>';
+                    html += '<td>'  + (element.winAmountOfGame/element.amountOfGame*100).toFixed(2) +'</td>';
+                    html += '<td>' + (element.amountOfGame/data.totalCount*100).toFixed(2) + '</td>';
+                    html += '<td>' + element.amountOfGame + '</td>';
+                    html += '</tr>';
+                });
+                html += '</tbody>';
+                html += '</table>';
+                html += '</div>';
+                $('#resultDiv').append(html);
+            }
+        }).done(
+            function () {
+                sortTable(3);
+            }
+        );
+    }
+</script>
+<body>
+    <div class="page-header">
+        <a href="/gamedata"><i class="fas fa-home"></i></a>
+        <img style="margin-left: 50px" class="imagemainsize" th:src="@{${'/img/champion/' + championId + '.png'}}" alt="">'
+        <img style="margin-left: 50px" class="imagelanesize" th:src="@{${'/img/lane/' + lane + '.png'}}" alt="">'
+        <div class="row top5CounterChamps" id = "top5CounterChamps">
+            <div class="col-xs-4 col-md-1">
+              <a href="#" class="top5counter">
+                <img src="..." alt="...">
+              </a>
+            </div>
+            <div class="col-xs-4 col-md-1">
+                <a href="#" class="top5counter">
+                  <img src="..." alt="...">
+                </a>
+            </div>
+            <div class="col-xs-4 col-md-1">
+                <a href="#" class="top5counter">
+                  <img src="..." alt="...">
+                </a>
+            </div>
+            <div class="col-xs-4 col-md-1">
+                <a href="#" class="top5counter">
+                  <img src="..." alt="...">
+                </a>
+            </div>
+            <div class="col-xs-4 col-md-1">
+                <a href="#" class="top5counter">
+                  <img src="..." alt="...">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="champnavbar">
+        <ol class="breadcrumb">
+            <li><a th:href = "@{/gamedata/{championId}(championId = ${championId}, lane = ${lane})}">챔피언 통계</a></li>
+            <li><a th:href = "@{/gamedata/{championId}/chem(championId = ${championId}, lane = ${lane})}">챔피언 케미</a></li>
+            <li><a th:href = "@{/gamedata/{championId}/counter(championId = ${championId}, lane = ${lane})}">챔피언 카운터</a></li>
+        </ol>
+    </div>
+    <div class="levelskill">
+        <h3>스킬</h3>
+        <nav class="navbar navbar-default navbar-static-top">
+          <div class="container">
+              <ul class="nav navbar-nav">
+                  <li><a href="#" onclick="getAjax('skill5')">5레벨</a></li>
+                  <li><a href="#" onclick="getAjax('skill10')">10레벨</a></li>
+                  <li><a href="#" onclick="getAjax('skill15')">15레벨</a></li>
+              </ul>
+          </div>
+        </nav>
+        <div id="resultDiv">
+            <table class="table table-hover" id="skilltable">
+                <thead>
+                <tr>
+                    <th>스킬트리</th>
+                    <th>승률</th>
+                    <th>선택률</th>
+                    <td>표본 수</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>스킬</td>
+                    <td>승률</td>
+                    <td>선택률</td>
+                    <td>표본 수</td>
+                </tr>
+                <tr>
+                    <td>스킬</td>
+                    <td>승률</td>
+                    <td>선택률</td>
+                    <td>표본 수</td>
+                </tr>
+                <tr>
+                    <td>스킬</td>
+                    <td>승률</td>
+                    <td>선택률</td>
+                    <td>표본 수</td>
+                </tr>
+                <tr>
+                    <td>스킬</td>
+                    <td>승률</td>
+                    <td>선택률</td>
+                    <td>표본 수</td>
+                </tr>
+                <tr>
+                    <td>스킬</td>
+                    <td>승률</td>
+                    <td>선택률</td>
+                    <td>표본 수</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

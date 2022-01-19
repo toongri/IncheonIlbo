@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link th:href="@{/css/bootstrap.css}" rel="stylesheet" />
+    <title>JSP AJAX</title>
+    <script th:src="@{/js/jquery-3.6.0.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<script>
+const roomTypeMap = new Map([
+    [266, "아트록스"],
+    [103, "아리"],
+    [84, "아칼리"],
+    [166, "아크샨"],
+    [12, "알리스타"],
+    [32, "아무무"],
+    [34, "애니비아"],
+    [1, "애니"],
+    [523, "아펠리오스"],
+    [22, "애쉬"],
+    [136, "아우렐리온 솔"],
+    [268, "아지르"],
+    [432, "바드"],
+    [53, "블리츠크랭크"],
+    [63, "브랜드"],
+    [201, "브라움"],
+    [51, "케이틀린"],
+    [164, "카밀"],
+    [69, "카시오페아"],
+    [31, "초가스"],
+    [42, "코르키"],
+    [122, "다리우스"],
+    [131, "다이애나"],
+    [119, "드레이븐"],
+    [36, "문도 박사"],
+    [245, "에코"],
+    [60, "엘리스"],
+    [28, "이블린"],
+    [81, "이즈리얼"],
+    [9, "피들스틱"],
+    [114, "피오라"],
+    [105, "피즈"],
+    [3, "갈리오"],
+    [41, "갱플랭크"],
+    [86, "가렌"],
+    [150, "나르"],
+    [79, "그라가스"],
+    [104, "그레이브즈"],
+    [887, "그웬"],
+    [120, "헤카림"],
+    [74, "하이머딩거"],
+    [420, "일라오이"],
+    [39, "이렐리아"],
+    [427, "아이번"],
+    [40, "잔나"],
+    [59, "자르반 4세"],
+    [24, "잭스"],
+    [126, "제이스"],
+    [202, "진"],
+    [222, "징크스"],
+    [145, "카이사"],
+    [429, "칼리스타"],
+    [43, "카르마"],
+    [30, "카서스"],
+    [38, "카사딘"],
+    [55, "카타리나"],
+    [10, "케일"],
+    [141, "케인"],
+    [85, "케넨"],
+    [121, "카직스"],
+    [203, "킨드레드"],
+    [240, "클레드"],
+    [96, "코그모"],
+    [7, "르블랑"],
+    [64, "리 신"],
+    [89, "레오나"],
+    [876, "릴리아"],
+    [127, "리산드라"],
+    [236, "루시안"],
+    [117, "룰루"],
+    [99, "럭스"],
+    [54, "말파이트"],
+    [90, "말자하"],
+    [57, "마오카이"],
+    [11, "마스터 이"],
+    [21, "미스 포츈"],
+    [62, "오공"],
+    [82, "모데카이저"],
+    [25, "모르가나"],
+    [267, "나미"],
+    [75, "나서스"],
+    [111, "노틸러스"],
+    [518, "니코"],
+    [76, "니달리"],
+    [56, "녹턴"],
+    [20, "누누와 윌럼프"],
+    [2, "올라프"],
+    [61, "오리아나"],
+    [516, "오른"],
+    [80, "판테온"],
+    [78, "뽀삐"],
+    [555, "파이크"],
+    [246, "키아나"],
+    [133, "퀸"],
+    [497, "라칸"],
+    [33, "람머스"],
+    [421, "렉사이"],
+    [526, "렐"],
+    [58, "레넥톤"],
+    [107, "렝가"],
+    [92, "리븐"],
+    [68, "럼블"],
+    [13, "라이즈"],
+    [360, "사미라"],
+    [113, "세주아니"],
+    [235, "세나"],
+    [147, "세라핀"],
+    [875, "세트"],
+    [35, "샤코"],
+    [98, "쉔"],
+    [102, "쉬바나"],
+    [27, "신지드"],
+    [14, "사이온"],
+    [15, "시비르"],
+    [72, "스카너"],
+    [37, "소나"],
+    [16, "소라카"],
+    [50, "스웨인"],
+    [517, "사일러스"],
+    [134, "신드라"],
+    [223, "탐 켄치"],
+    [163, "탈리야"],
+    [91, "탈론"],
+    [44, "타릭"],
+    [17, "티모"],
+    [412, "쓰레쉬"],
+    [18, "트리스타나"],
+    [48, "트런들"],
+    [23, "트린다미어"],
+    [4, "트위스티드 페이트"],
+    [29, "트위치"],
+    [77, "우디르"],
+    [6, "우르곳"],
+    [110, "바루스"],
+    [67, "베인"],
+    [45, "베이가"],
+    [161, "벨코즈"],
+    [711, "벡스"],
+    [254, "바이"],
+    [234, "비에고"],
+    [112, "빅토르"],
+    [8, "블라디미르"],
+    [106, "볼리베어"],
+    [19, "워윅"],
+    [498, "자야"],
+    [101, "제라스"],
+    [5, "신 짜오"],
+    [157, "야스오"],
+    [777, "요네"],
+    [83, "요릭"],
+    [350, "유미"],
+    [154, "자크"],
+    [238, "제드"],
+    [115, "직스"],
+    [26, "질리언"],
+    [142, "조이"],
+    [143, "자이라"]
+]);
+$(document).ready(function() {
+    var lane='TOP';
+    getAjax(lane);
+});
+function sortTextTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("myTable");
+    switching = true;
+    //Set the sorting direction to ascending:
+    dir = "asc";
+    /*Make a loop that will continue until
+    no switching has been done:*/
+    while (switching) {
+        //start by saying: no switching is done:
+        switching = false;
+        rows = table.rows;
+        /*Loop through all table rows (except the
+        first, which contains table headers):*/
+        for (i = 1; i < (rows.length - 1); i++) {
+            //start by saying there should be no switching:
+            shouldSwitch = false;
+            /*Get the two elements you want to compare,
+            one from current row and one from the next:*/
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            /*check if the two rows should switch place,
+            based on the direction, asc or desc:*/
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    //if so, mark as a switch and break the loop:
+                    shouldSwitch= true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    //if so, mark as a switch and break the loop:
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            /*If a switch has been marked, make the switch
+            and mark that a switch has been done:*/
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            //Each time a switch is done, increase this count by 1:
+            switchcount ++;
+        } else {
+            /*If no switching has been done AND the direction is "asc",
+            set the direction to "desc" and run the while loop again.*/
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}
+function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("main-tbl");
+    switching = true;
+    var arr;
+    //Set the sorting direction to ascending:
+    arr = ['asc', 'desc'];
+    dir = arr[0];
+    /*Make a loop that will continue until
+    no switching has been done:*/
+    while (switching) {
+        //start by saying: no switching is done:
+        switching = false;
+        rows = table.rows;
+        /*Loop through all table rows (except the
+        first, which contains table headers):*/
+        for (i = 1; i < (rows.length - 1); i++) {
+            //start by saying there should be no switching:
+            shouldSwitch = false;
+            /*Get the two elements you want to compare,
+            one from current row and one from the next:*/
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            /*check if the two rows should switch place,
+            based on the direction, asc or desc:*/
+            if (dir == arr[0]) {
+                if (Number(x.innerHTML) < Number(y.innerHTML)) {
+                    //if so, mark as a switch and break the loop:
+                    shouldSwitch= true;
+                    break;
+                }
+            } else if (dir == arr[1]) {
+                if (Number(x.innerHTML) > Number(y.innerHTML)) {
+                    //if so, mark as a switch and break the loop:
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            /*If a switch has been marked, make the switch
+            and mark that a switch has been done:*/
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            //Each time a switch is done, increase this count by 1:
+            switchcount ++;
+        } else {
+            /*If no switching has been done AND the direction is "asc",
+            set the direction to "desc" and run the while loop again.*/
+            if (switchcount == 0 && dir == arr[0]) {
+                dir = arr[1];
+                switching = true;
+            }
+        }
+    }
+}
+
+function getAjax(lane) {
+    var messageDTO={
+        lane:lane
+    };
+    $.ajax({
+        url: '/gamedata/api/main',
+        data: messageDTO,
+        type:'GET',
+        success: function (data) {
+            $('#resultDiv').empty();
+            var html = '<table class="table table-hover" id="main-tbl">';
+            html += '<thead>';
+            html += '<tr>';
+            html += '<th>' + '아이콘' + '</th>';
+            html += '<th onclick="sortTable(1)">' + '챔피언' + '</th>';
+            html += '<th onclick="sortTable(2)"><a href="#">' + '승률( %)' + '</th>';
+            html += '<th onclick="sortTable(3)"><a href="#">' + '픽률( %)' + '</th>';
+            html += '<th onclick="sortTable(4)"><a href="#">' + '표본 수' + '</th>';
+            html += '</tr>';
+            html += '</thead>';
+            html += '<tbody>';
+            $.each(data.data, function (index, element) {
+                html += '<tr>';
+                html += '<td> <a href="/gamedata/' + element.championId + '?lane=' + lane + '"><img class="imagesize" src="/img/champion/' + element.championId + '.png" alt=""> </a> </td>'
+                html += '<td> <a href="/gamedata/' + element.championId + '?lane=' + lane + '">' + roomTypeMap.get(element.championId) + '</td>';
+                html += '<td>' + (element.winRate*100).toFixed(2) + '</td>';
+                html += '<td>' + (element.amountOfGame/data.totalCount*100).toFixed(2) + '</td>';
+                html += '<td>' + element.amountOfGame + '</td>';
+                html += '</tr>';
+            });
+            html += '</tbody>';
+            html += '</table>';
+            html += '</div>';
+            $('#resultDiv').append(html);
+        }
+    }).done(
+        function () {
+            sortTable(4);
+        }
+    );
+}
+</script>
+
+<body>
+    <h3 class="main">main.html</h3>
+    <ul class="nav nav-tabs" id="lane-menu">
+        <li role="presentation"><a href='javascript:void(0);' onclick="getAjax('TOP')">탑</a></li>
+        <li role="presentation"><a href='javascript:void(0);' onclick="getAjax('JUNGLE')">정글</a></li>
+        <li role="presentation"><a href='javascript:void(0);' onclick="getAjax('MIDDLE')">미드</a></li>
+        <li role="presentation"><a href='javascript:void(0);' onclick="getAjax('BOTTOM')">원딜</a></li>
+        <li role="presentation"><a href='javascript:void(0);' onclick="getAjax('UTILITY')">서포터</a></li>
+      </ul>
+
+    <div id="resultDiv">
+        <table class="table table-hover" id="main-tbl">
+            <thead>
+            <tr>
+                <th>아이콘</th>
+                <th>챔피언</th>
+                <th>승률</th>
+                <th>픽률</th>
+                <th>표본 수</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+                <td>내용</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

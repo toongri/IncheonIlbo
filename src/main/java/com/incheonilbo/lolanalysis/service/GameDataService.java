@@ -24,7 +24,7 @@ public class GameDataService {
 
     final List<String> laneList = Arrays.asList("TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY");
     final List<String> skillChoiceArray = Arrays.asList("skill5", "skill10", "skill15");
-    final Integer COUNT5_GAME_LIMIT = 100;
+    final Integer COUNT5_GAME_LIMIT = 20;
     final Integer COUNT5_CHAMP_LIMIT = 5;
 
     public List<ForChampsTableAboutChampAllAndWinRate> getChampsTable(String laneCond) {
@@ -102,6 +102,31 @@ public class GameDataService {
             if (dataListToMap.containsKey(skillCombination)) {
                 result.add(new ForSkillAllCountAndWinCount(data.getSkillCombination(), dataListToMap.get(data.getSkillCombination()), data.getAmountOfGame()));
             }
+        }
+        return result;
+    }
+
+    public Long findCountAboutSkillByChampId(Integer championIdCond, String laneCond, String skillLengthCond) {
+
+        if (Objects.equals(skillLengthCond, skillChoiceArray.get(0))) {
+            return champSkillQueryRepository.getCountAmountOfGameAboutSkillDataIndex0(championIdCond, laneCond);
+        } else if (Objects.equals(skillLengthCond, skillChoiceArray.get(1))) {
+            return champSkillQueryRepository.getCountAmountOfGameAboutSkillDataIndex1(championIdCond, laneCond);
+        } else {
+            return champSkillQueryRepository.getCountAmountOfGameAboutSkillDataIndex2(championIdCond, laneCond);
+        }
+    }
+
+    public Map<String, Long> findChemCountChampsByLaneAndChamp(Map<String, List<ForChemChampLessLaneAndChampionId>> map) {
+
+        Map<String, Long> result = new HashMap<>();
+        for (String s : map.keySet()) {
+            List<ForChemChampLessLaneAndChampionId> forChemChampLessLaneAndChampionIds = map.get(s);
+            result.put(s, 0L);
+            for (ForChemChampLessLaneAndChampionId champ : forChemChampLessLaneAndChampionIds) {
+                result.put(s,result.get(s) + champ.getAmountOfGame());
+            }
+
         }
         return result;
     }

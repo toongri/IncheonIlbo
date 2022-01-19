@@ -8,3 +8,4 @@ import lombok.Data;
 public class ApiResult<T> {
     private T data;
 }
+

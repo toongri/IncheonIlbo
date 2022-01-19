@@ -1,0 +1,143 @@
+
+.main {
+    background-color: aquamarine;
+    margin: 10px 10px 10px 10px;
+    font-size: 30px;
+}
+
+#lane-menu {
+    padding-bottom: 30px;
+}
+
+#main-tbl {
+    padding-bottom: 50px;
+}
+
+.btn-group {
+    float: right;
+    margin-right: auto;
+}
+
+.banpick {
+    background-color: burlywood;
+    float: right;
+}
+.row {
+    padding-top: 50px;
+    float: right;
+}
+.toplanediv {
+    width: 70%;
+}
+.midlanediv {
+    width: 70%;
+}
+.jgllanediv {
+    width: 70%;
+}
+.bottomlanediv {
+    width: 70%;
+}
+.suplanediv {
+    width: 70%;
+}
+
+.lanediv {
+    height: 100px;
+    width: 50px;
+    float: left;
+    display: block;
+}
+.champions {
+    float: left;
+    width:900px;
+    white-space:nowrap;
+    overflow-x:scroll;
+}
+
+.imgcontainer{
+    flex-direction: row;
+}
+.rate {
+    list-style-type: none;
+    display: inline-block;
+}
+.levelskill {
+    float: left;
+}
+
+.imagesize{
+    height: 50px;
+    width: 50px;
+}
+
+
+.imagecountersize{
+    height: 40px;
+    width: 40px;
+}
+
+.top5counter{
+    height: 80px;
+    width: 60px;
+}
+.top5CounterChamps{
+    margin-right: 25%;
+}
+.imagemainsize{
+    height:125px;
+    width:125px;
+}
+
+.imagelanesize{
+    height:85px;
+    width:85px;
+}
+
+.tablescroll {
+    overflow: auto;
+    height:325px;
+}
+
+.tableheader {
+    width:98%;
+    margin-bottom:0px;
+}
+
+.skillcolumn {
+    width : 900px;
+}
+
+
+.lane {
+    width: 10%;
+    height: 30%;
+    float: left;
+    word-break:break-all;
+    word-wrap:break-word;
+    margin:5px;
+}
+.maincontainer{
+    padding: 5%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.champ {
+    width:50px;
+    display: inline-block;
+    margin:5px;
+}
+.mainlane{
+    display: block;
+    width:100%;
+    word-break:break-all;
+    word-wrap:break-word;
+}
+
+.container2 {
+    width:900px;
+    display: inline-block;
+    flex-direction: column;
+}
