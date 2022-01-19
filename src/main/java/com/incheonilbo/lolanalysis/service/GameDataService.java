@@ -1,10 +1,8 @@
 package com.incheonilbo.lolanalysis.service;
 
 import com.incheonilbo.lolanalysis.dto.*;
-import com.incheonilbo.lolanalysis.repository.query.ChampCounterQueryRepository;
-import com.incheonilbo.lolanalysis.repository.query.ChampSkillQueryRepository;
-import com.incheonilbo.lolanalysis.repository.query.ChampTableRepository;
-import com.incheonilbo.lolanalysis.repository.query.ChemChampsQueryRepository;
+import com.incheonilbo.lolanalysis.repository.query.*;
+import jdk.swing.interop.SwingInterOpUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,10 +15,11 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class GameDataService {
 
-    private final ChemChampsQueryRepository gameDataQueryRepository;
+    private final ChemChampsQueryRepository chemChampsQueryRepository;
     private final ChampSkillQueryRepository champSkillQueryRepository;
     private final ChampCounterQueryRepository champCounterQueryRepository;
     private final ChampTableRepository champTableRepository;
+    private final CounterChampsQueryRepository counterChampsQueryRepository;
 
     final List<String> laneList = Arrays.asList("TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY");
     final List<String> skillChoiceArray = Arrays.asList("skill5", "skill10", "skill15");
@@ -126,14 +125,21 @@ public class GameDataService {
             for (ForChemChampLessLaneAndChampionId champ : forChemChampLessLaneAndChampionIds) {
                 result.put(s,result.get(s) + champ.getAmountOfGame());
             }
-
         }
         return result;
     }
 
     public Map<String, List<ForChemChampLessLaneAndChampionId>> findChemChampsByLaneAndChamp(Integer championId, String laneCond, List<Integer> championIdsCond, List<String> lanesCond) {
-        List<ForChemChamp> champs = gameDataQueryRepository.getForChemChamps(championId, laneCond, championIdsCond, lanesCond);
-        List<ForChemChamp> champsAboutWin = gameDataQueryRepository.getForChemChampsAboutWin(championId, laneCond, championIdsCond, lanesCond);
+        List<ForChemChamp> champs = chemChampsQueryRepository.getForChemChamps(championId, laneCond, championIdsCond, lanesCond);
+        List<ForChemChamp> champsAboutWin = chemChampsQueryRepository.getForChemChampsAboutWin(championId, laneCond, championIdsCond, lanesCond);
+
+        Map<String, Map<Integer, Long>> champsUsingMap = changeChampListToMap(champs);
+        return setChampVictoryAmountInMap(champsAboutWin, champsUsingMap);
+    }
+
+    public Map<String, List<ForChemChampLessLaneAndChampionId>> findCounterChampsByLaneAndChamp(Integer championId, String laneCond, List<Integer> championIdsCond, List<String> lanesCond) {
+        List<ForChemChamp> champs = counterChampsQueryRepository.getForCounterChamps(championId, laneCond, championIdsCond, lanesCond);
+        List<ForChemChamp> champsAboutWin = counterChampsQueryRepository.getForCounterChampsAboutWin(championId, laneCond, championIdsCond, lanesCond);
 
         Map<String, Map<Integer, Long>> champsUsingMap = changeChampListToMap(champs);
         return setChampVictoryAmountInMap(champsAboutWin, champsUsingMap);
@@ -173,7 +179,6 @@ public class GameDataService {
     }
 
     private Map<String, Map<Integer, Long>> changeChampListToMap(List<ForChemChamp> champs) {
-
         Map<String, Map<Integer, Long>> map = new HashMap<>();
 
         for (String s : laneList) {

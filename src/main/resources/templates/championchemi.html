@@ -17,6 +17,67 @@
         getAjax();
     });
 
+    function sortTable(n) {
+        table = document.getElementById("resultDiv");
+        var tablerows = table.children;
+
+        for (var i = 0; i < (tablerows.length); i++) {
+            var table, rows, switching, x, y, shouldSwitch, dir, switchcount = 0, j;
+            switching = true;
+            var arr;
+            //Set the sorting direction to ascending:
+            arr = ['asc', 'desc'];
+            dir = arr[0];
+            /*Make a loop that will continue until
+            no switching has been done:*/
+            while (switching) {
+                //start by saying: no switching is done:
+                switching = false;
+                rows = tablerows[i].children[1].children;
+                /*Loop through all table rows (except the
+                first, which contains table headers):*/
+                for (j = 0; j < (rows.length - 1); j++) {
+                    //start by saying there should be no switching:
+                    shouldSwitch = false;
+                    /*Get the two elements you want to compare,
+                    one from current row and one from the next:*/
+                    x = rows[j].children[n];
+                    y = rows[j + 1].children[n];
+                    /*check if the two rows should switch place,
+                    based on the direction, asc or desc:*/
+                    if (dir == arr[0]) {
+                        if (Number(x.innerHTML) < Number(y.innerHTML)) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch= true;
+                            break;
+                        }
+                    } else if (dir == arr[1]) {
+                        if (Number(x.innerHTML) > Number(y.innerHTML)) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[j].parentNode.insertBefore(rows[j + 1], rows[j]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount ++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == arr[0]) {
+                        dir = arr[1];
+                        switching = true;
+                    }
+                }
+            }
+        }
+    }
+
     function getAjax() {
         var lane = '[[${lane}]]';
         var champId = [[${championId}]];
@@ -40,7 +101,6 @@
             data: messageDTO,
             type:'GET',
             success: function (data) {
-                console.log(data);
                 $('#resultDiv').empty();
                 $('#chemChamps').empty();
                 var html = '';
@@ -168,9 +228,8 @@
         <nav class="navbar navbar-default navbar-static-top">
             <div class="container">
                 <ul class="nav navbar-nav">
-                    <li><a href="#">pick</a></li>
-                    <li><a href="#">ban</a></li>
-                    <li><a href="#">winrate</a></li>
+                    <li onclick="sortTable(3)"><a href="#">pick</a></li>
+                    <li onclick="sortTable(1)"><a href="#">winrate</a></li>
                 </ul>
             </div>
         </nav>

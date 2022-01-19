@@ -9,11 +9,156 @@
     <script th:src="@{/js/jquery-3.6.0.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/bootstrap.js}"></script>
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.2.0/css/all.min.css" integrity="sha512-6c4nX2tn5KbzeBJo9Ywpa0Gkt+mzCzJBrE1RB6fmpcsoN+b/w/euwIMuQKNyUoU/nToKN3a8SgNOtPrbW12fug==" crossorigin="anonymous" />
 </head>
 <script>
     $(document).ready(function() {
         getCounter();
+        getAjax();
     });
+
+    function sortTable(n) {
+        table = document.getElementById("resultDiv");
+        var tablerows = table.children;
+
+        for (var i = 0; i < (tablerows.length); i++) {
+            var table, rows, switching, x, y, shouldSwitch, dir, switchcount = 0, j;
+            switching = true;
+            var arr;
+            //Set the sorting direction to ascending:
+            arr = ['asc', 'desc'];
+            dir = arr[0];
+            /*Make a loop that will continue until
+            no switching has been done:*/
+            while (switching) {
+                //start by saying: no switching is done:
+                switching = false;
+                rows = tablerows[i].children[1].children;
+                /*Loop through all table rows (except the
+                first, which contains table headers):*/
+                for (j = 0; j < (rows.length - 1); j++) {
+                    //start by saying there should be no switching:
+                    shouldSwitch = false;
+                    /*Get the two elements you want to compare,
+                    one from current row and one from the next:*/
+                    x = rows[j].children[n];
+                    y = rows[j + 1].children[n];
+                    /*check if the two rows should switch place,
+                    based on the direction, asc or desc:*/
+                    if (dir == arr[0]) {
+                        if (Number(x.innerHTML) < Number(y.innerHTML)) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch= true;
+                            break;
+                        }
+                    } else if (dir == arr[1]) {
+                        if (Number(x.innerHTML) > Number(y.innerHTML)) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[j].parentNode.insertBefore(rows[j + 1], rows[j]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount ++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == arr[0]) {
+                        dir = arr[1];
+                        switching = true;
+                    }
+                }
+            }
+        }
+    }
+
+    function getAjax() {
+        var lane = '[[${lane}]]';
+        var champId = [[${championId}]];
+        var champs = [[${champs}]];
+        var lanes = '[[${lanes}]]';
+        lanes = lanes.substring(1, lanes.length-1);
+
+        if (lanes === '') {
+            lanes = [];
+        } else {
+            lanes = lanes.split(', ');
+        }
+
+        var messageDTO={
+            champs:champs,
+            lane:lane,
+            lanes:lanes
+        };
+        $.ajax({
+            url: '/gamedata/api/champs/' + champId + '/counter',
+            data: messageDTO,
+            type:'GET',
+            success: function (data) {
+                $('#resultDiv').empty();
+                $('#chemChamps').empty();
+                var html = '';
+                var html2 = '';
+                var lanelist;
+                var champlist;
+                $.each(champs, function (index, element) {
+                    lanelist = lanes.slice();
+                    champlist = champs.slice();
+                    lanelist.splice(index, 1);
+                    champlist.splice(index, 1);
+
+                    html2 += '<div class="col-xs-4 col-md-1 champ">';
+                    html2 += '<a href="/gamedata/' + champId + '/counter?lane='+ lane + '&lanes=' + lanelist + '&champs=' + champlist + '" class="chemichamp">';
+                    html2 += '<img class="imagesize" src="/img/champion/' + element + '.png" alt="">';
+                    html2 += '</a>';
+                    html2 += '</div>';
+                });
+                var LANE_LIST=['TOP', 'JUNGLE', 'MIDDLE','BOTTOM', 'UTILITY'];
+                for (var key of LANE_LIST) {
+                    if (data.totalCount[key] != 0) {
+                        html += '<div class="mainlane">';
+                        html += '<div class="lane">';
+                        html += '<img class="imagesize" src="/img/lane/' + key + '.png" alt="">';
+                        html += '<div>winRate( %)</div>';
+                        html += '<div>pickRate( %)</div>';
+                        html += '<div>games</div>';
+                        html += '</div>';
+                        html += '<div class="champions">';
+                        for (var forchamp of data.data[key]) {
+                            lanelist = lanes.slice();
+                            champlist = champs.slice();
+                            lanelist.push(key);
+                            champlist.push(forchamp.championId);
+                            html += '<div class="champ">';
+                            if (lanes.includes(key) || lane == key) {
+                                html +='<a>';
+                            } else {
+                                html += '<a href="/gamedata/' + champId + '/counter?lane='+ lane + '&lanes=' + lanelist + '&champs=' + champlist + '">';
+                            }
+                            html += '<img class="imagesize" src="/img/champion/' + forchamp.championId + '.png" alt="">';
+                            html += '</a>';
+                            html += '<div>' + (forchamp.amountOfGameAboutWin/forchamp.amountOfGame * 100).toFixed(2) + '</div>';
+                            html += '<div>' + (forchamp.amountOfGame/data.totalCount[key] * 100).toFixed(2) + '</div>';
+                            html += '<div>' + forchamp.amountOfGame + '</div>';
+                            html += '</div>';
+                        }
+                        html += '</div>';
+                        html += '</div>';
+                    }
+                }
+
+                $('#chemChamps').append(html2);
+                $('#resultDiv').append(html);
+            }
+        });
+    }
+
     function getCounter() {
         var lane = '[[${lane}]]';
         var champId = [[${championId}]];
@@ -42,199 +187,209 @@
     }
 </script>
 <body>
-    <div class="page-header">
-        <img style="margin-left: 50px" class="imagemainsize" th:src="@{${'/img/champion/' + championId + '.png'}}" alt="">'
-        <img style="margin-left: 50px" class="imagelanesize" th:src="@{${'/img/lane/' + lane + '.png'}}" alt="">'
-        <div class="row top5CounterChamps" id = "top5CounterChamps">
-            <div class="col-xs-4 col-md-1">
-                <a href="#" class="top5counter">
-                    <img src="..." alt="...">
-                </a>
-            </div>
-            <div class="col-xs-4 col-md-1">
-                <a href="#" class="top5counter">
-                    <img src="..." alt="...">
-                </a>
-            </div>
-            <div class="col-xs-4 col-md-1">
-                <a href="#" class="top5counter">
-                    <img src="..." alt="...">
-                </a>
-            </div>
-            <div class="col-xs-4 col-md-1">
-                <a href="#" class="top5counter">
-                    <img src="..." alt="...">
-                </a>
-            </div>
-            <div class="col-xs-4 col-md-1">
-                <a href="#" class="top5counter">
-                    <img src="..." alt="...">
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="champnavbar">
-        <ol class="breadcrumb">
-            <li><a th:href = "@{/gamedata/{championId}(championId = ${championId}, lane = ${lane})}">챔피언 통계</a></li>
-            <li><a th:href = "@{/gamedata/{championId}/chem(championId = ${championId}, lane = ${lane})}">챔피언 케미</a></li>
-            <li><a th:href = "@{/gamedata/{championId}/counter(championId = ${championId}, lane = ${lane})}">챔피언 카운터</a></li>
-        </ol>
-    </div>
-
-    <div>
-        <h3>카운터</h3>
-    </div>
-    <div>
-        <nav class="navbar navbar-default navbar-static-top">
-            <div class="container">
-                <ul class="nav navbar-nav">
-                    <li><a href="#">pick</a></li>
-                    <li><a href="#">ban</a></li>
-                    <li><a href="#">winrate</a></li>
-                </ul>
-            </div>
-        </nav>
-    </div>
-
-    <div>
+<div class="page-header">
+    <a href="/gamedata"><i class="fas fa-home"></i></a>
+    <img style="margin-left: 50px" class="imagemainsize" th:src="@{${'/img/champion/' + championId + '.png'}}" alt="">'
+    <img style="margin-left: 50px" class="imagelanesize" th:src="@{${'/img/lane/' + lane + '.png'}}" alt="">'
+    <div class="row top5CounterChamps" id = "top5CounterChamps">
         <div class="col-xs-4 col-md-1">
-            <a href="#" class="counterchamp">
-            <img src="..." alt="...">
+            <a href="#" class="top5counter">
+                <img src="..." alt="...">
             </a>
         </div>
         <div class="col-xs-4 col-md-1">
-            <a href="#" class="counterchamp">
-            <img src="..." alt="...">
+            <a href="#" class="top5counter">
+                <img src="..." alt="...">
             </a>
         </div>
         <div class="col-xs-4 col-md-1">
-            <a href="#" class="counterchamp">
-            <img src="..." alt="...">
+            <a href="#" class="top5counter">
+                <img src="..." alt="...">
             </a>
         </div>
         <div class="col-xs-4 col-md-1">
-            <a href="#" class="counterchamp">
-            <img src="..." alt="...">
+            <a href="#" class="top5counter">
+                <img src="..." alt="...">
+            </a>
+        </div>
+        <div class="col-xs-4 col-md-1">
+            <a href="#" class="top5counter">
+                <img src="..." alt="...">
             </a>
         </div>
     </div>
+</div>
 
-    <div class="maincontainer">
-        <div class='mainlane'>
-            <div class="lane">
-                탑
-            </div>
-            <div class="champions">
-                    <div class="champ">
-                        챔피언1
-                    </div>
-                    <div class="champ">
-                        챔피언2
-                    </div>
-                    <div class="champ">
-                        챔피언3
-                    </div>
-                    <div class="champ">
-                        챔피언4
-                    </div>
-                    <div class="champ">
-                        챔피언5
-                    </div>
-                </div>
+<div class="champnavbar">
+    <ol class="breadcrumb">
+        <li><a th:href = "@{/gamedata/{championId}(championId = ${championId}, lane = ${lane})}">챔피언 통계</a></li>
+        <li><a th:href = "@{/gamedata/{championId}/chem(championId = ${championId}, lane = ${lane})}">챔피언 케미</a></li>
+        <li><a th:href = "@{/gamedata/{championId}/counter(championId = ${championId}, lane = ${lane})}">챔피언 카운터</a></li>
+    </ol>
+</div>
+<div class = "levelskill">
+    <h3>케미</h3>
+    <nav class="navbar navbar-default navbar-static-top">
+        <div class="container">
+            <ul class="nav navbar-nav">
+                <li onclick="sortTable(3)"><a href="#">pick</a></li>
+                <li onclick="sortTable(1)"><a href="#">winrate</a></li>
+            </ul>
         </div>
-        <hr>
-        <div class='mainlane'>
-            <div class="lane">
-                미드
+    </nav>
+</div>
+
+<div class="container2" id="chemChamps">
+    <div class="col-xs-4 col-md-1 champ">
+        <a href="#" class="chemichamp">
+            <img src="..." alt="...">
+        </a>
+    </div>
+    <div class="col-xs-4 col-md-1 champ">
+        <a href="#" class="chemichamp">
+            <img src="..." alt="...">
+        </a>
+    </div>
+    <div class="col-xs-4 col-md-1 champ">
+        <a href="#" class="chemichamp">
+            <img src="..." alt="...">
+        </a>
+    </div>
+</div>
+
+<div class="maincontainer" id="resultDiv">
+    <div class='mainlane'>
+        <div class="lane">
+            <div>탑</div>
+            <div>wirRate</div>
+            <div>picRate</div>
+            <div>games</div>
+        </div>
+        <div class="champions">
+            <div class="champ">
+                <div>챔피언1</div>
+                <div>wirRate</div>
+                <div>picRate</div>
+                <div>games</div>
             </div>
-            <div class="champions">
-                    <div class="champ">
-                        챔피언1
-                    </div>
-                    <div class="champ">
-                        챔피언2
-                    </div>
-                    <div class="champ">
-                        챔피언3
-                    </div>
-                    <div class="champ">
-                        챔피언4
-                    </div>
-                    <div class="champ">
-                        챔피언5
-                    </div>
+            <div class="champ">
+                <div>챔피언2</div>
+                <div>wirRate</div>
+                <div>picRate</div>
+                <div>games</div>
+            </div>
+            <div class="champ">
+                <div>챔피언3</div>
+                <div>wirRate</div>
+                <div>picRate</div>
+                <div>games</div>
+            </div>
+            <div class="champ">
+                <div>챔피언4</div>
+                <div>wirRate</div>
+                <div>picRate</div>
+                <div>games</div>
+            </div>
+            <div class="champ">
+                <div>챔피언5</div>
+                <div>wirRate</div>
+                <div>picRate</div>
+                <div>games</div>
             </div>
         </div>
+    </div>
     <hr>
-        <div class='mainlane'>
-            <div class="lane">
-                정글
-            </div>
-            <div class="champions">
-                    <div class="champ">
-                        챔피언1
-                    </div>
-                    <div class="champ">
-                        챔피언2
-                    </div>
-                    <div class="champ">
-                        챔피언3
-                    </div>
-                    <div class="champ">
-                        챔피언4
-                    </div>
-                    <div class="champ">
-                        챔피언5
-                    </div>
-            </div>
+    <div class='mainlane'>
+        <div class="lane">
+            미드
         </div>
-        <hr>
-        <div class='mainlane'>
-            <div class="lane">
-                바텀
+        <div class="champions">
+            <div class="champ">
+                챔피언1
             </div>
-            <div class="champions">
-                <div class="champ">
-                    챔피언1
-                </div>
-                <div class="champ">
-                    챔피언2
-                </div>
-                <div class="champ">
-                    챔피언3
-                </div>
-                <div class="champ">
-                    챔피언4
-                </div>
-                <div class="champ">
-                    챔피언5
-                </div>
+            <div class="champ">
+                챔피언2
             </div>
-        </div>
-        <hr>
-        <div class='mainlane'>
-            <div class="lane">
-                서포터
+            <div class="champ">
+                챔피언3
             </div>
-            <div class="champions">
-                <div class="champ">
-                    챔피언1
-                </div>
-                <div class="champ">
-                    챔피언2
-                </div>
-                <div class="champ">
-                    챔피언3
-                </div>
-                <div class="champ">
-                    챔피언4
-                </div>
-                <div class="champ">
-                    챔피언5
-                </div>
+            <div class="champ">
+                챔피언4
+            </div>
+            <div class="champ">
+                챔피언5
             </div>
         </div>
     </div>
+    <hr>
+    <div class='mainlane'>
+        <div class="lane">
+            정글
+        </div>
+        <div class="champions">
+            <div class="champ">
+                챔피언1
+            </div>
+            <div class="champ">
+                챔피언2
+            </div>
+            <div class="champ">
+                챔피언3
+            </div>
+            <div class="champ">
+                챔피언4
+            </div>
+            <div class="champ">
+                챔피언5
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class='mainlane'>
+        <div class="lane">
+            바텀
+        </div>
+        <div class="champions">
+            <div class="champ">
+                챔피언1
+            </div>
+            <div class="champ">
+                챔피언2
+            </div>
+            <div class="champ">
+                챔피언3
+            </div>
+            <div class="champ">
+                챔피언4
+            </div>
+            <div class="champ">
+                챔피언5
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class='mainlane'>
+        <div class="lane">
+            서포터
+        </div>
+        <div class="champions">
+            <div class="champ">
+                챔피언1
+            </div>
+            <div class="champ">
+                챔피언2
+            </div>
+            <div class="champ">
+                챔피언3
+            </div>
+            <div class="champ">
+                챔피언4
+            </div>
+            <div class="champ">
+                챔피언5
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

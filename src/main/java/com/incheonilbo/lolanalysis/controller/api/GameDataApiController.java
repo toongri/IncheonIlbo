@@ -35,13 +35,16 @@ public class GameDataApiController {
             @RequestParam(value = "lanes[]", required = false, defaultValue = "") List<String> lanes) {
         Map<String, List<ForChemChampLessLaneAndChampionId>> dd = gameDataService.findChemChampsByLaneAndChamp(championId, lane, champs, lanes);
 
-        for (String s : lanes) {
-            System.out.println(s);
-        }
-        for (Integer s : champs) {
-            System.out.println(s);
-        }
-        System.out.println(lane);
+        return new ApiTotalResult(dd, gameDataService.findChemCountChampsByLaneAndChamp(dd));
+    }
+
+    @GetMapping("/champs/{id}/counter")
+    public ApiTotalResult dfdfdf(
+            @PathVariable(value = "id") Integer championId, @RequestParam("lane") String lane,
+            @RequestParam(value = "champs[]", required = false, defaultValue = "") List<Integer> champs,
+            @RequestParam(value = "lanes[]", required = false, defaultValue = "") List<String> lanes) {
+        Map<String, List<ForChemChampLessLaneAndChampionId>> dd = gameDataService.findCounterChampsByLaneAndChamp(championId, lane, champs, lanes);
+
         return new ApiTotalResult(dd, gameDataService.findChemCountChampsByLaneAndChamp(dd));
     }
 
