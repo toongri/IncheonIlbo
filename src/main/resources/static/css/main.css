@@ -141,3 +141,20 @@
     display: inline-block;
     flex-direction: column;
 }
+
+.loadingImg {
+    height: 200px;
+    margin: 200px 200px 200px 600px;
+}
+
+.imagecountersize:hover, .imagesize:hover{
+    outline: none;
+    border-color: #9ecaed;
+    box-shadow: 0 0 10px #9ecaed;
+}
+
+.nonclickimagesize{
+
+    height: 50px;
+    width: 50px;
+}

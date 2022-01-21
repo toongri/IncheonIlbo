@@ -152,7 +152,14 @@
                 $('#chemChamps').append(html2);
                 $('#resultDiv').append(html);
             }
-        });
+        }).done(
+            function () {
+                var loader = $('#loader');
+                var maincontent = $('#maincontent');
+                loader.css("display", "none");
+                maincontent.css("display", "block");
+            }
+        );
     }
 
     function getCounter() {
@@ -183,6 +190,10 @@
     }
 </script>
 <body>
+<div class="loader" id="loader">
+    <img class = "loadingImg" src="/img/loading/load.gif" alt="">
+</div>
+<div class = "content" id = "maincontent" style="display: none">
     <div class="page-header">
         <a href="/gamedata"><i class="fas fa-home"></i></a>
         <img style="margin-left: 50px" class="imagemainsize" th:src="@{${'/img/champion/' + championId + '.png'}}" alt="">'
@@ -387,5 +398,6 @@
             </div>
         </div>
     </div>
+</div>
 </body>
 </html>

@@ -324,12 +324,20 @@ function getAjax(lane) {
     }).done(
         function () {
             sortTable(4);
+            var loader = $('#loader');
+            var maincontent = $('#maincontent');
+            loader.css("display", "none");
+            maincontent.css("display", "block");
         }
     );
 }
 </script>
 
 <body>
+<div class="loader" id="loader">
+    <img class = "loadingImg" src="/img/loading/load.gif" alt="">
+</div>
+<div class = "content" id = "maincontent" style="display: none">
     <h3 class="main">main.html</h3>
     <ul class="nav nav-tabs" id="lane-menu">
         <li role="presentation"><a href='javascript:void(0);' onclick="getAjax('TOP')">탑</a></li>
@@ -337,7 +345,7 @@ function getAjax(lane) {
         <li role="presentation"><a href='javascript:void(0);' onclick="getAjax('MIDDLE')">미드</a></li>
         <li role="presentation"><a href='javascript:void(0);' onclick="getAjax('BOTTOM')">원딜</a></li>
         <li role="presentation"><a href='javascript:void(0);' onclick="getAjax('UTILITY')">서포터</a></li>
-      </ul>
+    </ul>
 
     <div id="resultDiv">
         <table class="table table-hover" id="main-tbl">
@@ -424,6 +432,6 @@ function getAjax(lane) {
             </tbody>
         </table>
     </div>
-
+</div>
 </body>
 </html>

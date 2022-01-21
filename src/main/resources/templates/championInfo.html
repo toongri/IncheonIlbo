@@ -17,7 +17,6 @@
         getAjax(skills);
         getCounter();
         table = document.getElementById("skilltable");
-        console.log(table.rows);
     });
 
     function sortTable(n) {
@@ -130,11 +129,11 @@
                 html += '<div class = "tablescroll">'
                 html += '<table class="table table-hover" id="skilltable">';
                 html += '<tbody>';
-                $.each(data.data, function (index, element) {
+                $.each(data.data, function (index,   element) {
                     html += '<tr>';
                     html += '<td class ="skillcolumn">';
                     for (let i = 0; i < element.skillCombination.length; i++) {
-                        html += '<img class="imagesize" src="/img/spell/' + champId
+                        html += '<img class="nonclickimagesize" src="/img/spell/' + champId
                             + '_' + element.skillCombination[i] + '.png" alt="">';
                     }
                     html += '</td>';
@@ -151,39 +150,47 @@
         }).done(
             function () {
                 sortTable(3);
+                var loader = $('#loader');
+                var maincontent = $('#maincontent');
+                loader.css("display", "none");
+                maincontent.css("display", "block");
             }
         );
     }
 </script>
 <body>
+<div class="loader" id="loader">
+    <img class = "loadingImg" src="/img/loading/load.gif" alt="">
+</div>
+<div class = "content" id = "maincontent" style="display: none">
     <div class="page-header">
         <a href="/gamedata"><i class="fas fa-home"></i></a>
-        <img style="margin-left: 50px" class="imagemainsize" th:src="@{${'/img/champion/' + championId + '.png'}}" alt="">'
-        <img style="margin-left: 50px" class="imagelanesize" th:src="@{${'/img/lane/' + lane + '.png'}}" alt="">'
+        <img style="margin-left: 50px" class="imagemainsize" th:src="@{${'/img/champion/' + championId + '.png'}}" alt="">
+        <img style="margin-left: 50px" class="imagelanesize" th:src="@{${'/img/lane/' + lane + '.png'}}" alt="">
         <div class="row top5CounterChamps" id = "top5CounterChamps">
             <div class="col-xs-4 col-md-1">
-              <a href="#" class="top5counter">
-                <img src="..." alt="...">
-              </a>
-            </div>
-            <div class="col-xs-4 col-md-1">
                 <a href="#" class="top5counter">
-                  <img src="..." alt="...">
+                    <img src="..." alt="...">
                 </a>
             </div>
             <div class="col-xs-4 col-md-1">
                 <a href="#" class="top5counter">
-                  <img src="..." alt="...">
+                    <img src="..." alt="...">
                 </a>
             </div>
             <div class="col-xs-4 col-md-1">
                 <a href="#" class="top5counter">
-                  <img src="..." alt="...">
+                    <img src="..." alt="...">
                 </a>
             </div>
             <div class="col-xs-4 col-md-1">
                 <a href="#" class="top5counter">
-                  <img src="..." alt="...">
+                    <img src="..." alt="...">
+                </a>
+            </div>
+            <div class="col-xs-4 col-md-1">
+                <a href="#" class="top5counter">
+                    <img src="..." alt="...">
                 </a>
             </div>
         </div>
@@ -199,13 +206,13 @@
     <div class="levelskill">
         <h3>스킬</h3>
         <nav class="navbar navbar-default navbar-static-top">
-          <div class="container">
-              <ul class="nav navbar-nav">
-                  <li><a href="#" onclick="getAjax('skill5')">5레벨</a></li>
-                  <li><a href="#" onclick="getAjax('skill10')">10레벨</a></li>
-                  <li><a href="#" onclick="getAjax('skill15')">15레벨</a></li>
-              </ul>
-          </div>
+            <div class="container">
+                <ul class="nav navbar-nav">
+                    <li><a href="#" onclick="getAjax('skill5')">5레벨</a></li>
+                    <li><a href="#" onclick="getAjax('skill10')">10레벨</a></li>
+                    <li><a href="#" onclick="getAjax('skill15')">15레벨</a></li>
+                </ul>
+            </div>
         </nav>
         <div id="resultDiv">
             <table class="table table-hover" id="skilltable">
@@ -252,5 +259,7 @@
             </table>
         </div>
     </div>
+</div>
+
 </body>
 </html>
