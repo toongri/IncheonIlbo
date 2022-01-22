@@ -25,4 +25,4 @@ spring:
 decorator:
   datasource:
     p6spy:
-      enable-logging: false
+      enable-logging: false #서버 배포시 false
