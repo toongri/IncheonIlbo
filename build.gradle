@@ -1,7 +1,7 @@
 buildscript {
 	ext{
 		queryDslVersion = "4.4.0"
-		springFrameworkBootVersion = "2.5.8"
+		springFrameworkBootVersion = "2.5.9"
 		projectLombokVersion = "1.18.22"
 		odbcJdbcVersion = "21.1.0.0"
 		swaggerVersion = "2.9.2"
@@ -10,16 +10,26 @@ buildscript {
 }
 
 plugins {
-	id 'org.springframework.boot' version '2.5.8'
+	id 'org.springframework.boot' version '2.5.9'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	//querydsl 추가
 	id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 	id 'java'
+	id 'war'
 }
+
 
 group = 'com.incheonilbo'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
+//
+//bootWar {
+//	archiveBaseName ='-'
+//	archiveFileName='-.war'
+//	archiveVersion="0.0.0"
+//}
+
+
 
 configurations {
 	compileOnly {
@@ -37,15 +47,23 @@ dependencies {
 	implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springFrameworkBootVersion}"
 	implementation "org.springframework.boot:spring-boot-starter-web:${springFrameworkBootVersion}"
 	implementation "org.springframework.boot:spring-boot-starter-thymeleaf:${springFrameworkBootVersion}"
-	developmentOnly "org.springframework.boot:spring-boot-devtools:${springFrameworkBootVersion}"
+//	developmentOnly "org.springframework.boot:spring-boot-devtools:${springFrameworkBootVersion}"
 	testImplementation "org.springframework.boot:spring-boot-starter-test:${springFrameworkBootVersion}"
 	compileOnly "org.projectlombok:lombok:${projectLombokVersion}"
 	annotationProcessor "org.projectlombok:lombok:${projectLombokVersion}"
-	runtimeOnly "com.oracle.database.jdbc:ojdbc8:${odbcJdbcVersion}"
+//	runtimeOnly "com.oracle.database.jdbc:ojdbc8:${odbcJdbcVersion}"
+
 	//swagger 추가
 	implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
 	implementation "io.springfox:springfox-swagger-ui:${swaggerVersion}"
 	implementation "com.github.gavlyukovskiy:p6spy-spring-boot-starter:${p6spyVersion}"//개발용 코드 서비스시엔 성능비교 후 사용 필수
+
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+
+	implementation 'com.oracle.database.security:oraclepki:19.10.0.0'
+	implementation 'com.oracle.database.security:osdt_cert:19.10.0.0'
+	implementation 'com.oracle.database.security:osdt_core:19.10.0.0'
+	implementation 'com.oracle.database.jdbc:ojdbc10:19.10.0.0'
 }
 
 test {

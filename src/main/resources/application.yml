@@ -2,9 +2,9 @@ spring:
   profiles:
     active: local
   datasource:
-    url: jdbc:oracle:thin:@localhost:1521:XE
-    username: toong
-    password: 2579
+    url: jdbc:oracle:thin:@DHB_high?TNS_ADMIN=/opt/apache-tomcat-8.5.75/Wallet_DHB/
+    username: admin
+    password: qwerasdfzxcvQ@1213
     driver-class-name: oracle.jdbc.driver.OracleDriver
   jpa:
     open-in-view: false
