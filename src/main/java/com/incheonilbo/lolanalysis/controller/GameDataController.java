@@ -34,6 +34,7 @@ public class GameDataController {
             @PathVariable(value = "id") Integer championId, @RequestParam("lane") String lane,
             @RequestParam(value = "champs", required = false, defaultValue = "") List<Integer> champs,
             @RequestParam(value = "lanes", required = false, defaultValue = "") List<String> lanes) {
+        System.out.println("chemiPage");
         model.addAttribute("championId", championId);
         model.addAttribute("lane", lane);
         model.addAttribute("champs", champs);
