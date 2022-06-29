@@ -24,7 +24,7 @@ public class GameDataApiController {
 
     @GetMapping("/main")
     public ApiTotalResult getMainApi(@RequestParam("lane") String lane) {
-
+        System.out.println("main");
         return new ApiTotalResult(gameDataService.getChampsTable(lane), champTableRepository.findTotalCountByLane(lane));
     }
 
